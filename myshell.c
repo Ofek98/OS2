@@ -141,6 +141,31 @@ int process_arglist(int count, char** arglist){
             }
 
         }
+
+        else if (symbol[0] == 3){
+            int input_file = open(arglist[symbol[1] + 1], O_RDONLY);
+            if(dup2(input_file, STDIN_FILENO) < 0){
+                print_error_and_exit();
+            }
+            if (close(input_file) < 0){
+                print_error_and_exit();
+            }
+            ppid_1 = fork_and_check_for_error();  
+            if (ppid_1 == 0){
+                if (execvp(arglist[0],arglist) == -1){
+                    print_error_and_exit();
+            }
+            else{
+                if(wait(NULL) < 0){
+                    print_error_and_exit();
+                }
+                free(symbol);
+                return 0;
+            }
+        }
+
+
+        }
     }
 
 }
