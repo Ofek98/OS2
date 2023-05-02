@@ -106,7 +106,7 @@ int process_arglist(int count, char** arglist){
                 if(dup2(pipefd[1], STDOUT_FILENO) < 0){
                     print_error_and_exit();
                 }
-                if (close(pipefd[1]) < 0){
+                if (close(pipefd[1]) < 0 || close(pipefd[0] < 0)){
                     print_error_and_exit();
                 }
                 if (execvp(arglist[0],arglist) == -1){
@@ -117,10 +117,11 @@ int process_arglist(int count, char** arglist){
             else {
                 ppid_2 = fork_and_check_for_error(); 
                 if (ppid_2 == 0){
+                    sleep(2);//make sure that other child finished writing first
                     if(dup2(pipefd[0], STDIN_FILENO) < 0){
                         print_error_and_exit();
                     }
-                    if (close(pipefd[0]) < 0){
+                    if (close(pipefd[1]) < 0 || close(pipefd[0] < 0)){
                         print_error_and_exit();
                     }
                     if (execvp(arglist[symbol[1]],arglist+symbol[1]+1) == -1){
@@ -130,6 +131,9 @@ int process_arglist(int count, char** arglist){
                 else{
                     if(wait(NULL) < 0){
                          print_error_and_exit();
+                    }
+                    if (close(pipefd[1]) < 0 || close(pipefd[0] < 0)){
+                        print_error_and_exit();
                     }
                     free(symbol);
                     return 0;
